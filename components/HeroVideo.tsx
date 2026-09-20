@@ -88,7 +88,7 @@ export default function HeroVideo() {
       // this nested function (it can't prove `video` wasn't reassigned by
       // the time this runs asynchronously via requestAnimationFrame), so it
       // needs its own explicit null check even though we know it's set.
-      if (!video) return;
+      if (!video || !ctx) return;
       if (video.paused || video.ended || video.readyState < 2) return;
       if (timestamp - lastSampleTime < AMBIENT_SAMPLE_INTERVAL_MS) return;
       lastSampleTime = timestamp;
@@ -163,6 +163,10 @@ export default function HeroVideo() {
       video.src = `/videos/${best.name}.mp4`;
 
       const handleLoadedMetadata = () => {
+        // Same TypeScript closure-narrowing limitation as sampleAmbientColor
+        // above — `video` needs its own null check inside this nested
+        // function even though loadBestSource already checked it.
+        if (!video) return;
         video.removeEventListener("loadedmetadata", handleLoadedMetadata);
         if (resumeTime > 0 && resumeTime < video.duration - 0.2) {
           video.currentTime = resumeTime;
