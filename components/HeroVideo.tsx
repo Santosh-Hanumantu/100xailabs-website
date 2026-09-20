@@ -84,6 +84,11 @@ export default function HeroVideo() {
     function sampleAmbientColor(timestamp: number) {
       rafId = requestAnimationFrame(sampleAmbientColor);
 
+      // TypeScript can't carry the `if (!video) return` narrowing above into
+      // this nested function (it can't prove `video` wasn't reassigned by
+      // the time this runs asynchronously via requestAnimationFrame), so it
+      // needs its own explicit null check even though we know it's set.
+      if (!video) return;
       if (video.paused || video.ended || video.readyState < 2) return;
       if (timestamp - lastSampleTime < AMBIENT_SAMPLE_INTERVAL_MS) return;
       lastSampleTime = timestamp;
